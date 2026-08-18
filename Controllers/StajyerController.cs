@@ -6,7 +6,7 @@ using StajyerTakip.Services.InternalServices.Interfaces;
 namespace StajyerTakip.Controllers
 {
     [ApiController]
-    [Route("api/stajyerler")]
+    [Route("api/[controller]")]
     public class StajyerController : ControllerBase
     {
         private readonly IStajyerService _stajyerService;
@@ -20,27 +20,30 @@ namespace StajyerTakip.Controllers
         [Authorize(Roles = "Admin,Mentor")]
         public async Task<IActionResult> Create([FromBody] StajyerCreateDto dto)
         {
-            var stajyer = await _stajyerService.CreateAsync(dto);
+            var result = await _stajyerService.CreateAsync(dto);
 
-            var response = new StajyerCreateResponseDto
-            {
-                StajyerId = stajyer.StajyerId,
-                Ad = stajyer.Ad,
-                Soyad = stajyer.Soyad,
-                Durum = stajyer.Durum,
-                OlusturmaTarihi = stajyer.OlusturmaTarihi
-            };
-
-            return Created($"/api/stajyerler/{stajyer.StajyerId}", response);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpGet]
+        [Route("getAll")]
         [Authorize(Roles = "Admin,Mentor,Yonetici")]
         public async Task<IActionResult> GetAll()
         {
-            var stajyerler = await _stajyerService.GetAllAsync();
+            var result = await _stajyerService.GetAllAsync();
 
-            return Ok(stajyerler);
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var result = await _stajyerService.GetStajyer(id);
+
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="bin\**" />
-    <Content Remove="bin\**" />
-    <EmbeddedResource Remove="bin\**" />
-    <None Remove="bin\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
@@ -32,7 +25,6 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Models\DtoModels\" />
-    <Folder Include="Results\" />
     <Folder Include="Services\ExternalServices\Interfaces\" />
     <Folder Include="Services\ExternalServices\Implementations\" />
   </ItemGroup>

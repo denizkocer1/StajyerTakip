@@ -1,7 +1,9 @@
 ﻿using StajyerTakip.DAL.Abstract.Base;
 using StajyerTakip.Models.DbModels;
 using StajyerTakip.Models.DtoModels;
+using StajyerTakip.Results;
 using StajyerTakip.Services.InternalServices.Interfaces;
+using System.Net;
 
 
 namespace StajyerTakip.Services.InternalServices.Implementations
@@ -16,11 +18,11 @@ namespace StajyerTakip.Services.InternalServices.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<StajyerListResponseDto>> GetAllAsync()
+        public async Task<DataResult<List<StajyerListResponseDto>>> GetAllAsync()
         {
             var stajyerler = await _unitOfWork.StajyerRepository.GetAllWithRelationsAsync();
 
-            return stajyerler.Select(s => new StajyerListResponseDto
+            var stajyerListesi = stajyerler.Select(s => new StajyerListResponseDto
             {
                 StajyerId = s.StajyerId,
                 Ad = s.Ad,
@@ -35,9 +37,34 @@ namespace StajyerTakip.Services.InternalServices.Implementations
                 DepartmanAdi = s.Departman?.DepartmanAdi,
                 MentorAdSoyad = s.Mentor is null ? null : $"{s.Mentor.Ad} {s.Mentor.Soyad}"
             }).ToList();
+
+            return DataResult<List<StajyerListResponseDto>>
+                .SuccessDataResult(
+                    stajyerListesi,
+                    "Stajyerler başarıyla getirildi."
+                );
         }
 
-        public async Task<Stajyer> CreateAsync(StajyerCreateDto dto)
+        public async Task<DataResult<Stajyer>> GetStajyer(int id)
+        {
+            var entity = await _unitOfWork.StajyerRepository.GetByIdAsync(id);
+
+            if (entity is null)
+            {
+                return DataResult<Stajyer>.ErrorDataResult(
+                    "Stajyer bulunamadı.",
+                    HttpStatusCode.NotFound
+                );
+            }
+
+            return DataResult<Stajyer>.SuccessDataResult(
+                entity,
+                "Stajyer başarıyla getirildi."
+            );
+        }
+
+
+        public async Task<DataResult<StajyerCreateResponseDto>> CreateAsync(StajyerCreateDto dto)
         {
             var stajyer = new Stajyer
             {
@@ -71,7 +98,22 @@ namespace StajyerTakip.Services.InternalServices.Implementations
             await _unitOfWork.StajyerRepository.AddAsync(stajyer);
             await _unitOfWork.CommitAsync();
 
-            return stajyer;
+
+            var response = new StajyerCreateResponseDto
+            {
+                StajyerId = stajyer.StajyerId,
+                Ad = stajyer.Ad,
+                Soyad = stajyer.Soyad,
+                Durum = stajyer.Durum,
+                OlusturmaTarihi = stajyer.OlusturmaTarihi
+            };
+
+
+            return DataResult<StajyerCreateResponseDto>
+            .SuccessDataResult(
+                response,
+                "Stajyer başarıyla eklendi."
+             );
         }
     }
 }
