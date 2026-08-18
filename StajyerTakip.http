@@ -1,0 +1,6 @@
+@StajyerTakip_HostAddress = http://localhost:5071
+
+GET {{StajyerTakip_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
