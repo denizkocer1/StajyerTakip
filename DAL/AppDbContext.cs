@@ -48,8 +48,10 @@ namespace StajyerTakip.DAL
 
         public DbSet<Yorum> Yorumlar { get; set; }
 
-        
-        
+        public DbSet<AuditLog> AuditLogs { get; set; }
+
+
+
         //OnModelCreating
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -266,6 +268,9 @@ namespace StajyerTakip.DAL
                 .WithMany(k=>k.Yorumlar)
                 .HasForeignKey(d=>d.YazanId) 
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AuditLog>()
+                .HasKey(x => x.AuditLogId);
 
 
 

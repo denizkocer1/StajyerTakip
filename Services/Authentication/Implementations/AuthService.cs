@@ -3,6 +3,9 @@ using StajyerTakip.DAL.Abstract.Base;
 using StajyerTakip.Models.DtoModels;
 using StajyerTakip.Results;
 using StajyerTakip.Services.Authentication.Interfaces;
+using StajyerTakip.Models.DbModels;
+using StajyerTakip.Models.DbModels.Constants;
+
 
 namespace StajyerTakip.Services.Authentication.Implementations
 {
@@ -26,6 +29,18 @@ namespace StajyerTakip.Services.Authentication.Implementations
 
             if (kullanici is null || !kullanici.AktifMi)
             {
+                await _unitOfWork.AuditLogRepository.AddAsync(new AuditLog
+                {
+                    Created = DateTime.UtcNow,
+                    KullaniciId = kullanici?.KullaniciId,
+                    TableName = nameof(Kullanici),
+                    RecordId = kullanici?.KullaniciId,
+                    LogTypeId = (int)Enums.AuditLogType.LoginFailed,
+                    Description = $"{request.KullaniciAdi} kullanıcı adı ile giriş başarısız."
+                });
+
+                await _unitOfWork.CommitAsync();
+
                 return DataResult<LoginResponseDto>.ErrorDataResult(
                     "Kullanıcı adı veya şifre hatalı.",
                     HttpStatusCode.Unauthorized
@@ -35,6 +50,18 @@ namespace StajyerTakip.Services.Authentication.Implementations
             if (string.IsNullOrEmpty(kullanici.SifreHash) ||
                 !BCrypt.Net.BCrypt.Verify(request.Sifre, kullanici.SifreHash))
             {
+                await _unitOfWork.AuditLogRepository.AddAsync(new AuditLog
+                {
+                    Created = DateTime.UtcNow,
+                    KullaniciId = kullanici.KullaniciId,
+                    TableName = nameof(Kullanici),
+                    RecordId = kullanici.KullaniciId,
+                    LogTypeId = (int)Enums.AuditLogType.LoginFailed,
+                    Description = $"{request.KullaniciAdi} kullanıcı adı ile giriş başarısız."
+                });
+
+                await _unitOfWork.CommitAsync();
+
                 return DataResult<LoginResponseDto>.ErrorDataResult(
                     "Kullanıcı adı veya şifre hatalı.",
                     HttpStatusCode.Unauthorized
@@ -52,6 +79,18 @@ namespace StajyerTakip.Services.Authentication.Implementations
                 Soyad = kullanici.Soyad,
                 RolAdi = kullanici.Rol.RolAdi
             };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(new AuditLog
+            {
+                Created = DateTime.UtcNow,
+                KullaniciId = kullanici.KullaniciId,
+                TableName = nameof(Kullanici),
+                RecordId = kullanici.KullaniciId,
+                LogTypeId = (int)Enums.AuditLogType.Login,
+                Description = $"{kullanici.KullaniciAdi} kullanıcısı giriş yaptı."
+            });
+
+            await _unitOfWork.CommitAsync();
 
             return DataResult<LoginResponseDto>.SuccessDataResult(
                 response,

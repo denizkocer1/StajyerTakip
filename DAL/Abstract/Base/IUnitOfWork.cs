@@ -58,7 +58,7 @@
 
         IYorumRepository YorumRepository { get; }
 
-
+        IAuditLogRepository AuditLogRepository { get; }
 
 
 

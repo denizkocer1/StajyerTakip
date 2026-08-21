@@ -13,9 +13,20 @@ using StajyerTakip.Services.Authentication.Implementations;
 using StajyerTakip.Services.Authentication.Interfaces;
 using StajyerTakip.Services.InternalServices.Implementations;
 using StajyerTakip.Services.InternalServices.Interfaces;
-
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "Logs/system-log-.txt",
+        rollingInterval: RollingInterval.Day
+    )
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 
@@ -72,6 +83,14 @@ builder.Services.AddScoped<IYorumRepository, YorumRepository>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStajyerService, StajyerService>();
+
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+
+builder.Services.AddScoped<IDegerlendirmeService, DegerlendirmeService>();
+
+builder.Services.AddHttpContextAccessor();
+
+
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
     ?? throw new InvalidOperationException("Jwt ayarları appsettings.json içinde bulunamadı.");

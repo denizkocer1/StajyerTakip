@@ -4,6 +4,7 @@ using StajyerTakip.Models.DtoModels;
 using StajyerTakip.Results;
 using StajyerTakip.Services.InternalServices.Interfaces;
 using System.Net;
+using System.Security.Claims;
 
 
 namespace StajyerTakip.Services.InternalServices.Implementations
@@ -12,10 +13,32 @@ namespace StajyerTakip.Services.InternalServices.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public StajyerService(IUnitOfWork unitOfWork)
-        {
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
+        public StajyerService(
+            IUnitOfWork unitOfWork,
+            IHttpContextAccessor httpContextAccessor)
+        {
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private int? CurrentUserId
+        {
+            get
+            {
+                var userId = _httpContextAccessor.HttpContext?
+                    .User
+                    .FindFirst(ClaimTypes.NameIdentifier)?
+                    .Value;
+
+                if (int.TryParse(userId, out var id))
+                {
+                    return id;
+                }
+
+                return null;
+            }
         }
 
         public async Task<DataResult<List<StajyerListResponseDto>>> GetAllAsync()
@@ -96,6 +119,19 @@ namespace StajyerTakip.Services.InternalServices.Implementations
             };
 
             await _unitOfWork.StajyerRepository.AddAsync(stajyer);
+            await _unitOfWork.CommitAsync();
+
+            var auditLog = new AuditLog
+            {
+                Created = DateTime.UtcNow,
+                KullaniciId = CurrentUserId,
+                TableName = nameof(Stajyer),
+                RecordId = stajyer.StajyerId,
+                LogTypeId = (int)Models.DbModels.Constants.Enums.AuditLogType.Create,
+                Description = "Stajyer kaydı oluşturuldu."
+            };
+
+            await _unitOfWork.AuditLogRepository.AddAsync(auditLog);
             await _unitOfWork.CommitAsync();
 
 

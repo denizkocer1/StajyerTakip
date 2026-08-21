@@ -6,6 +6,7 @@ using StajyerTakip.Services.Authentication.Interfaces;
 
 namespace StajyerTakip.Controllers
 {
+
     [ApiController]
     [Route("api/login")]
     public class LoginController : ControllerBase
@@ -27,9 +28,7 @@ namespace StajyerTakip.Controllers
     }
 
 
-
-
-[Route("api/test")]
+    [Route("api/test")]
     public class TestController : ControllerBase
     {
         [Authorize]
@@ -38,6 +37,15 @@ namespace StajyerTakip.Controllers
         {
             return Ok("JWT çalýþýyor.");
         }
-    }
 
+
+
+       /* [HttpGet("test-error")]
+        [AllowAnonymous]
+        public IActionResult TestError()
+        {
+            throw new Exception("System log test hatasý.");
+        } */
+
+    }
 }

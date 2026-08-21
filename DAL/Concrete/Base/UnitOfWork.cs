@@ -43,6 +43,8 @@ namespace StajyerTakip.DAL.Concrete.Base
 
         public IYorumRepository YorumRepository { get; }
 
+        public IAuditLogRepository AuditLogRepository { get; }
+
 
 
         private readonly AppDbContext _context; //private çünkü başka repo sınıfları kullanmayacak sadece unitofwork kullanacak. readonly çünkü contructorda verilen bu context sonradan değiştirilemesin.
@@ -66,8 +68,10 @@ namespace StajyerTakip.DAL.Concrete.Base
             IRolRepository rolRepository,
             IRolModulYetkiRepository rolModulYetkiRepository,
             IStajyerBeceriRepository stajyerBeceriRepository,
-            IYorumRepository yorumRepository)  //UnitOfWork nesnesi oluşturulurken AppDbContext dışarıdan alınır ve _context içine koyulur.
+            IYorumRepository yorumRepository,  //UnitOfWork nesnesi oluşturulurken AppDbContext dışarıdan alınır ve _context içine koyulur.
+            IAuditLogRepository auditLogRepository)
         {
+
 
             _context = context;
 
@@ -89,6 +93,7 @@ namespace StajyerTakip.DAL.Concrete.Base
             RolModulYetkiRepository = rolModulYetkiRepository;
             StajyerBeceriRepository = stajyerBeceriRepository;
             YorumRepository = yorumRepository;
+            AuditLogRepository = auditLogRepository;
         }
 
         public async Task<int> CommitAsync()

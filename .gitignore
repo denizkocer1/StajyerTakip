@@ -4,3 +4,7 @@
 ## .NET build output
 bin/
 obj/
+
+
+# System logs
+Logs/
